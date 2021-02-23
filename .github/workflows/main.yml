@@ -42,7 +42,7 @@ jobs:
       # Run docker build
       - name: Run docker build
         run: |
-          cd "samples/aspnetapp/aspnetapp"
+          cd "samples/aspnetapp"
           docker build . -t safecontainersregistry.azurecr.io/best-for-you-organics:${{ github.sha }} 
         
           

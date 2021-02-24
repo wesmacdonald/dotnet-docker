@@ -51,7 +51,7 @@ jobs:
       - name: Run docker scan
         run: |
           cd "samples/aspnetapp"
-          docker scan --login --token ${{ snyk_token }}
+          docker scan --login --token ${{ secrets.snyk_token }}
           docker scan safecontainersregistry.azurecr.io/asp-net-app:${{ github.sha }} 
           
       - name: Scan images for vulnerabilities 

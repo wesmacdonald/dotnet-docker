@@ -51,5 +51,7 @@ jobs:
         continue-on-error: true 
         with:
           image-name: env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
+          run-quality-checks: true          
+          severity-threshold: LOW
           
 

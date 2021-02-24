@@ -51,8 +51,10 @@ jobs:
         continue-on-error: true 
         with:
           image-name: env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
-          run-quality-checks: true          
-          severity-threshold: LOW
+
+      - name: Push docker image to Azure Container Registry 
+        run: | 
+           docker push ${{ env.registry }}/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
 
       - name: Post logs to appinsights 
         uses: Azure/publish-security-assessments@v0 
@@ -62,8 +64,5 @@ jobs:
           subscription-token: ${{ secrets.asc_subscription_token }}
           instrumentation-key: ${{ secrets.ai_instrumentation_key }}
 
-      - name: Push docker image to Azure Container Registry 
-        run: | 
-           docker push ${{ env.registry }}/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
       
  

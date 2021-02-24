@@ -48,7 +48,7 @@ jobs:
       - name: Scan images for vulnerabilities 
         uses: Azure/container-scan@v0         
         id: container-scan 
-        continue-on-error: true 
+        continue-on-error: false 
         with:
           image-name: safecontainersregistry.azurecr.io/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
 

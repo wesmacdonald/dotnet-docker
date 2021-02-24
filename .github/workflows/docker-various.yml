@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Docker-Image-CI
 
 # Controls when the action will run. 
 on:
@@ -45,3 +45,11 @@ jobs:
           cd "samples/dotnetapp"
           docker build --pull -t env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }} -f Dockerfile.${{ matrix.docker-image }}-x64 .
       
+      - name: Scan images for vulnerabilities 
+        uses: Azure/container-scan@v0         
+        id: container-scan 
+        continue-on-error: true 
+        with:
+          image-name: env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
+          
+

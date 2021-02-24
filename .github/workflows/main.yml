@@ -22,18 +22,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-
+    
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      # Runs build steps manually
-      - name: Build Manually
-        run: |
-          cd "samples/aspnetapp/aspnetapp"
-          dotnet publish -c Release -o published
-          
+         
       # Login to ACR
       - name: Docker Login action
         uses: azure/docker-login@v1
@@ -68,6 +62,7 @@ jobs:
       
       - name: Post logs to appinsights 
         uses: Azure/publish-security-assessments@v0 
+        if: ${{ steps.container-scan.outcome == 'success' }}
         with: 
           scan-results-path: ${{steps.container-scan.outputs.scan-report-path}} 
           artifact-type: containerImage

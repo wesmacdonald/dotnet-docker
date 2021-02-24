@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        docker-iamge: [debian, ubuntu, alpine]
+        docker-image: [debian, ubuntu, alpine]
         
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

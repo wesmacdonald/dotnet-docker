@@ -62,7 +62,7 @@ jobs:
       
       - name: Post logs to appinsights 
         uses: Azure/publish-security-assessments@v0 
-        if: ${{ steps.container-scan.outputs.scan-report-path == null }}
+        if: ${{ steps.container-scan.outputs.scan-report-path != null }}
         with: 
           scan-results-path: ${{steps.container-scan.outputs.scan-report-path}} 
           artifact-type: containerImage

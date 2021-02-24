@@ -31,6 +31,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      # Login to ACR
+      - name: Docker Login action
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.registry }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}        
+      
       # Run docker build for each image (strategy matrix)
       - name: Run docker build
         run: |
@@ -54,14 +62,6 @@ jobs:
           subscription-token: ${{ secrets.asc_subscription_token }}
           instrumentation-key: ${{ secrets.ai_instrumentation_key }}
 
-      # Login to ACR
-      - name: Docker Login action
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ env.registry }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}        
-      
       - name: Push docker image to Azure Container Registry 
         run: | 
            docker push ${{ env.registry }}/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}

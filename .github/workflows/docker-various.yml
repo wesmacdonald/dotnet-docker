@@ -35,7 +35,7 @@ jobs:
       - name: Docker Login action
         uses: azure/docker-login@v1
         with:
-          login-server: env.registry
+          login-server: ${{ env.registry }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}     
           

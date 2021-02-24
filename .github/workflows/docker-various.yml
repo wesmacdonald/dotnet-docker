@@ -43,7 +43,7 @@ jobs:
       - name: Run docker build
         run: |
           cd "samples/dotnetapp"
-          docker build --pull -t env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }} -f Dockerfile.${{ matrix.docker-image }}-x64 .
+          docker build --pull -t ${{ env.registry }}/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }} -f Dockerfile.${{ matrix.docker-image }}-x64 .
       
       - name: Scan images for vulnerabilities 
         uses: Azure/container-scan@v0         
@@ -56,7 +56,7 @@ jobs:
           
       - name: Push docker image to Azure Container Registry 
         run: | 
-           docker push env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
+           docker push ${{ env.registry }}/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }}
       
       - name: Post logs to appinsights 
         uses: Azure/publish-security-assessments@v0 

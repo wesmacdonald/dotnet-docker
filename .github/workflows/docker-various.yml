@@ -43,5 +43,5 @@ jobs:
       - name: Run docker build
         run: |
           cd "samples/dotnetapp"
-          docker build --pull -t dotnetapp:${{ matrix.docker-image }} -f Dockerfile.${{ matrix.docker-image }}-x64 .
+          docker build --pull -t env.registry/dotnetapp:${{ matrix.docker-image }}-${{ github.sha }} -f Dockerfile.${{ matrix.docker-image }}-x64 .
       

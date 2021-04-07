@@ -41,7 +41,7 @@ jobs:
       - name: Run docker build
         run: |
           cd "samples/aspnetapp"
-          docker build -f Dockerfile.${{ matrix.image }} -t safecontainersregistry.azurecr.io/asp-net-app:${{ github.sha }} 
+          docker build -f ./Dockerfile.${{ matrix.image }} -t safecontainersregistry.azurecr.io/asp-net-app:${{ github.sha }} 
       
       - name: Run docker scan
         run: |

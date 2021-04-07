@@ -22,7 +22,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        image: [alpine-x64, windowsservercore-x64]
     
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -41,7 +40,7 @@ jobs:
       - name: Run docker build
         run: |
           cd "samples/aspnetapp"
-          docker build -f ./Dockerfile.${{ matrix.image }} -t safecontainersregistry.azurecr.io/asp-net-app:${{ github.sha }} 
+          docker build . -t safecontainersregistry.azurecr.io/asp-net-app:${{ github.sha }} 
       
       - name: Run docker scan
         run: |

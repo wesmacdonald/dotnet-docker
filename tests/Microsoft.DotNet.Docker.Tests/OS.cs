@@ -8,7 +8,6 @@ namespace Microsoft.DotNet.Docker.Tests
     {
         // Alpine
         public const string Alpine = "alpine";
-        public const string Alpine312 = "alpine3.12";
         public const string Alpine313 = "alpine3.13";
 
         // Debian
@@ -18,13 +17,15 @@ namespace Microsoft.DotNet.Docker.Tests
         public const string Stretch = "stretch";
         public const string StretchSlim = "stretch-slim";
 
+        // Mariner
+        public const string Mariner10 = "cbl-mariner1.0";
+
         // Ubuntu
         public const string Bionic = "bionic";
         public const string Focal = "focal";
 
         // Windows
         public const string NanoServer1809 = "nanoserver-1809";
-        public const string NanoServer1909 = "nanoserver-1909";
         public const string NanoServer2004 = "nanoserver-2004";
         public const string NanoServer20H2 = "nanoserver-20H2";
         public const string ServerCoreLtsc2019 = "windowsservercore-ltsc2019";

@@ -34,14 +34,14 @@ namespace Microsoft.DotNet.Docker.Tests
                 .Select(imageData => new object[] { imageData });
         }
 
-        [Theory]
+        [DotNetTheory]
         [MemberData(nameof(GetImageData))]
         public async Task VerifyDotnetSample(SampleImageData imageData)
         {
             await VerifySampleAsync(imageData, SampleImageType.Dotnetapp, (image, containerName) =>
             {
                 string output = DockerHelper.Run(image, containerName);
-                Assert.StartsWith("Hello from .NET!", output);
+                Assert.True(output.Contains("42") || output.StartsWith("Hello"));
 
                 ValidateEnvironmentVariables(imageData, image, SampleImageType.Dotnetapp);
 
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Docker.Tests
             });
         }
 
-        [Theory]
+        [DotNetTheory]
         [MemberData(nameof(GetImageData))]
         public async Task VerifyAspnetSample(SampleImageData imageData)
         {

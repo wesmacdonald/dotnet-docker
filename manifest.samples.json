@@ -10,8 +10,16 @@
       "images": [
         {
           "sharedTags": {
-            "dotnetapp": {},
-            "latest": {}
+            "dotnetapp": {
+              "syndication": {
+                "repo": "dotnet/core/samples"
+              }
+            },
+            "latest": {
+              "syndication": {
+                "repo": "dotnet/core/samples"
+              }
+            }
           },
           "platforms": [
             {
@@ -19,7 +27,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "dotnetapp-buster-slim-amd64": {}
+                "dotnetapp-buster-slim-amd64": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               }
             },
             {
@@ -28,7 +40,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "dotnetapp-buster-slim-arm32v7": {}
+                "dotnetapp-buster-slim-arm32v7": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "variant": "v7"
             },
@@ -38,7 +54,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "dotnetapp-buster-slim-arm64v8": {}
+                "dotnetapp-buster-slim-arm64v8": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "variant": "v8"
             },
@@ -47,15 +67,11 @@
               "os": "windows",
               "osVersion": "nanoserver-1809",
               "tags": {
-                "dotnetapp-nanoserver-1809": {}
-              }
-            },
-            {
-              "dockerfile": "samples/dotnetapp",
-              "os": "windows",
-              "osVersion": "nanoserver-1909",
-              "tags": {
-                "dotnetapp-nanoserver-1909": {}
+                "dotnetapp-nanoserver-1809": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               }
             },
             {
@@ -63,7 +79,11 @@
               "os": "windows",
               "osVersion": "nanoserver-2004",
               "tags": {
-                "dotnetapp-nanoserver-2004": {}
+                "dotnetapp-nanoserver-2004": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               }
             },
             {
@@ -71,14 +91,22 @@
               "os": "windows",
               "osVersion": "nanoserver-20H2",
               "tags": {
-                "dotnetapp-nanoserver-20H2": {}
+                "dotnetapp-nanoserver-20H2": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               }
             }
           ]
         },
         {
           "sharedTags": {
-            "aspnetapp": {}
+            "aspnetapp": {
+              "syndication": {
+                "repo": "dotnet/core/samples"
+              }
+            }
           },
           "platforms": [
             {
@@ -86,7 +114,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "aspnetapp-buster-slim-amd64": {}
+                "aspnetapp-buster-slim-amd64": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "customBuildLegGroups": [
                 {
@@ -104,7 +136,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "aspnetapp-buster-slim-arm32v7": {}
+                "aspnetapp-buster-slim-arm32v7": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "variant": "v7",
               "customBuildLegGroups": [
@@ -123,7 +159,11 @@
               "os": "linux",
               "osVersion": "buster",
               "tags": {
-                "aspnetapp-buster-slim-arm64v8": {}
+                "aspnetapp-buster-slim-arm64v8": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "variant": "v8",
               "customBuildLegGroups": [
@@ -141,7 +181,11 @@
               "os": "windows",
               "osVersion": "nanoserver-1809",
               "tags": {
-                "aspnetapp-nanoserver-1809": {}
+                "aspnetapp-nanoserver-1809": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "customBuildLegGroups": [
                 {
@@ -156,26 +200,13 @@
             {
               "dockerfile": "samples/aspnetapp",
               "os": "windows",
-              "osVersion": "nanoserver-1909",
-              "tags": {
-                "aspnetapp-nanoserver-1909": {}
-              },
-              "customBuildLegGroups": [
-                {
-                  "name": "pr-build",
-                  "type": "Integral",
-                  "dependencies": [
-                    "$(Repo:samples):dotnetapp-nanoserver-1909"
-                  ]
-                }
-              ]
-            },
-            {
-              "dockerfile": "samples/aspnetapp",
-              "os": "windows",
               "osVersion": "nanoserver-2004",
               "tags": {
-                "aspnetapp-nanoserver-2004": {}
+                "aspnetapp-nanoserver-2004": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "customBuildLegGroups": [
                 {
@@ -192,7 +223,11 @@
               "os": "windows",
               "osVersion": "nanoserver-20H2",
               "tags": {
-                "aspnetapp-nanoserver-20H2": {}
+                "aspnetapp-nanoserver-20H2": {
+                  "syndication": {
+                    "repo": "dotnet/core/samples"
+                  }
+                }
               },
               "customBuildLegGroups": [
                 {

@@ -20,30 +20,28 @@ stages:
     steps:
     - script: $(engPath)/get-drop-versions.sh $(channel)
       displayName: Get Versions
+    - powershell: $(engPath)/Set-DotnetVersions.ps1 $(dockerfileVersion) -RuntimeVersion $(runtimeVer) -AspnetVersion $(aspnetVer) -SdkVersion $(sdkVer) -ComputeShas -PrintArgsVariableOnly
+      displayName: Get update-dependencies args
     - script: docker build -t update-dependencies -f $(engPath)/update-dependencies/Dockerfile --pull .
       displayName: Build Update Dependencies Tool
     - script: >
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock update-dependencies
-        $(dockerfileVersion)
+        $(updateDepsArgs)
         --user $(dotnetDockerBot.userName)
         --email $(dotnetDockerBot.email)
         --password $(BotAccount-dotnet-docker-bot-PAT)
-        --product-version runtime=$(runtimeVer)
-        --product-version sdk=$(sdkVer)
-        --product-version aspnet=$(aspnetVer)
         --version-source-name dotnet/core-sdk
-        --compute-shas
       displayName: Run Update Dependencies
-- stage: Diagnostics
-  condition: eq(variables['update-diagnostics-enabled'], 'true')
+- stage: Monitor
+  condition: eq(variables['update-monitor-enabled'], 'true')
   dependsOn: [] # Allows it to run in parallel
   jobs:
   - job: UpdateDependencies
-    displayName: Update Dependencies (dotnet/diagnostics)
+    displayName: Update Dependencies (dotnet/dotnet-monitor)
     pool:
       vmImage: $(defaultLinuxAmd64PoolImage)
     steps:
-    - script: $(engPath)/get-drop-versions-monitor.sh
+    - script: $(engPath)/get-drop-versions-monitor.sh $(monitorChannel)
       displayName: Get Versions
     - script: docker build -t update-dependencies -f $(engPath)/update-dependencies/Dockerfile --pull .
       displayName: Build Update Dependencies Tool
@@ -54,5 +52,6 @@ stages:
         --email $(dotnetDockerBot.email)
         --password $(BotAccount-dotnet-docker-bot-PAT)
         --product-version monitor=$(monitorVer)
-        --version-source-name dotnet/diagnostics
+        --channel-name $(monitorChannel)
+        --version-source-name dotnet/dotnet-monitor
       displayName: Run Update Dependencies

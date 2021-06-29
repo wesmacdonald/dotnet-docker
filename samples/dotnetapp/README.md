@@ -49,7 +49,7 @@ RUN dotnet publish -c release -o /app --no-restore
 FROM mcr.microsoft.com/dotnet/runtime:5.0
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["./dotnetapp"]
+ENTRYPOINT ["dotnet", "dotnetapp.dll"]
 ```
 
 The `sdk:5.0` and `runtime:5.0` tags are both multi-arch tags that will result in an image that is compatible for the given chip and OS. These simple tags (only contain a version number) are great to get started with Docker because they adapt to your environment. We recommend using an OS-specific tag for the runtime for production applications to ensure that you always get the OS you expect. This level of specification isn't needed for the SDK in most cases.
@@ -171,7 +171,7 @@ You can improve startup performance by using [Ready to Run (R2R) compilation](ht
 You can add the `PublishReadyToRun` property in two ways:
 
 - Set it in your project file, as: `<PublishReadyToRun>true</PublishReadyToRun>`
-- Set it on the command line, as:  `/p:PublishReadToRun=true`
+- Set it on the command line, as:  `/p:PublishReadyToRun=true`
 
 The default `Dockerfile` that come with the sample doesn't use R2R compilation because the application is too small to warrant it. The bulk of the IL code that is executed in this sample application is within the .NET libraries, which are already R2R compiled.
 
@@ -239,4 +239,4 @@ dotnetapp           nanoserver          7092d2e6b0a4        9 minutes ago       
 ## More Samples
 
 * [.NET Docker Samples](../README.md)
-* [.NET Framework Docker Samples](https://github.com/microsoft/dotnet-framework-docker/blob/master/samples/README.md)
+* [.NET Framework Docker Samples](https://github.com/microsoft/dotnet-framework-docker/blob/main/samples/README.md)

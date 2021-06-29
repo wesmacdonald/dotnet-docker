@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,15 +20,21 @@ namespace Microsoft.DotNet.Docker.Tests
 
         protected override DotNetImageType ImageType => DotNetImageType.Aspnet;
 
-        [Theory]
+        [DotNetTheory]
         [MemberData(nameof(GetImageData))]
         public async Task VerifyAppScenario(ProductImageData imageData)
         {
+            // Skip test for .NET 5 on Arm32 Alpine 3.13 due to https://github.com/dotnet/runtime/issues/47423
+            if (imageData.Version.Major == 5 && imageData.OS == "alpine3.13" && imageData.Arch == Arch.Arm)
+            {
+                return;
+            }
+            
             ImageScenarioVerifier verifier = new ImageScenarioVerifier(imageData, DockerHelper, OutputHelper, isWeb: true);
             await verifier.Execute();
         }
 
-        [Theory]
+        [DotNetTheory]
         [MemberData(nameof(GetImageData))]
         public void VerifyEnvironmentVariables(ProductImageData imageData)
         {
@@ -44,7 +51,27 @@ namespace Microsoft.DotNet.Docker.Tests
                 variables.Add(RuntimeImageTests.GetRuntimeVersionVariableInfo(imageData, DockerHelper));
             }
 
+            if (imageData.Version.Major >= 6)
+            {
+                variables.Add(new EnvironmentVariableInfo("Logging__Console__FormatterName", "Json"));
+            }
+
             base.VerifyCommonEnvironmentVariables(imageData, variables);
+        }
+
+        [DotNetTheory]
+        [MemberData(nameof(GetImageData))]
+        public void VerifyPackageInstallation(ProductImageData imageData)
+        {
+            if (!(imageData.OS.Contains("cbl-mariner") && imageData.Version.Major >= 6))
+            {
+                return;
+            }
+
+            VerifyExpectedInstalledRpmPackages(
+                imageData,
+                GetExpectedRpmPackagesInstalled(imageData)
+                    .Concat(RuntimeImageTests.GetExpectedRpmPackagesInstalled(imageData)));
         }
 
         public static EnvironmentVariableInfo GetAspnetVersionVariableInfo(ProductImageData imageData, DockerHelper dockerHelper)
@@ -67,5 +94,11 @@ namespace Microsoft.DotNet.Docker.Tests
 
             return null;
         }
+
+        internal static string[] GetExpectedRpmPackagesInstalled(ProductImageData imageData) =>
+            new string[]
+                {
+                    $"aspnetcore-runtime-{imageData.VersionString}"
+                };
     }
 }

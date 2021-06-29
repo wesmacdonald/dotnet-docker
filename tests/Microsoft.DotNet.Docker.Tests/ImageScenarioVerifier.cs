@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -60,6 +61,13 @@ namespace Microsoft.DotNet.Docker.Tests
 
                 if (DockerHelper.IsLinuxContainerModeEnabled)
                 {
+                    // Skip test until end-to-end scenario works for self-contained publishing on Alpine arm32
+                    if ((_imageData.Version.Major == 5) &&
+                        _imageData.Arch == Arch.Arm && _imageData.OS.Contains("alpine"))
+                    {
+                        return;
+                    }
+
                     // Use `sdk` image to publish self contained app and run with `runtime-deps` image
                     string selfContainedTag = BuildTestAppImage("self_contained_app", appDir, customBuildArgs: $"rid={_imageData.Rid}");
                     tags.Add(selfContainedTag);
@@ -78,21 +86,54 @@ namespace Microsoft.DotNet.Docker.Tests
             string programFilePath = Path.Combine(appDir, "Program.cs");
 
             SyntaxTree programTree = CSharpSyntaxTree.ParseText(File.ReadAllText(programFilePath));
+
+            string newContent;
+
             MethodDeclarationSyntax mainMethod = programTree.GetRoot().DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
                 .FirstOrDefault(method => method.Identifier.ValueText == "Main");
 
-            StatementSyntax testHttpsConnectivityStatement = SyntaxFactory.ParseStatement(
-                "var task = new System.Net.Http.HttpClient().GetAsync(\"https://www.microsoft.com\");" +
-                "task.Wait();" +
-                "task.Result.EnsureSuccessStatusCode();");
+            if (mainMethod is null)
+            {
+                // Handles project templates that use top-level statements instead of a Main method
+                IEnumerable<SyntaxNode> nodes = programTree.GetRoot().ChildNodes();
 
-            MethodDeclarationSyntax newMainMethod = mainMethod.InsertNodesBefore(
-                mainMethod.Body.ChildNodes().First(),
-                new SyntaxNode[] { testHttpsConnectivityStatement });
+                IEnumerable<UsingDirectiveSyntax> usingDirectives = nodes.OfType<UsingDirectiveSyntax>();
 
-            SyntaxNode newRoot = programTree.GetRoot().ReplaceNode(mainMethod, newMainMethod);
-            File.WriteAllText(programFilePath, newRoot.ToFullString());
+                IEnumerable<SyntaxNode> otherNodes = nodes.Except(usingDirectives);
+
+                StringBuilder builder = new();
+                foreach (UsingDirectiveSyntax usingDir in usingDirectives)
+                {
+                    builder.Append(usingDir.ToFullString());
+                }
+
+                builder.AppendLine("var response = await new System.Net.Http.HttpClient().GetAsync(\"https://www.microsoft.com\");");
+                builder.AppendLine("response.EnsureSuccessStatusCode();");
+
+                foreach (SyntaxNode otherNode in otherNodes)
+                {
+                    builder.Append(otherNode.ToFullString());
+                }
+
+                newContent = builder.ToString();
+            }
+            else
+            {
+                StatementSyntax testHttpsConnectivityStatement = SyntaxFactory.ParseStatement(
+                    "var task = new System.Net.Http.HttpClient().GetAsync(\"https://www.microsoft.com\");" +
+                    "task.Wait();" +
+                    "task.Result.EnsureSuccessStatusCode();");
+
+                MethodDeclarationSyntax newMainMethod = mainMethod.InsertNodesBefore(
+                    mainMethod.Body.ChildNodes().First(),
+                    new SyntaxNode[] { testHttpsConnectivityStatement });
+
+                SyntaxNode newRoot = programTree.GetRoot().ReplaceNode(mainMethod, newMainMethod);
+                newContent = newRoot.ToFullString();
+            }
+            
+            File.WriteAllText(programFilePath, newContent);
         }
 
         private string BuildTestAppImage(string stageTarget, string contextDir, params string[] customBuildArgs)
@@ -209,14 +250,14 @@ namespace Microsoft.DotNet.Docker.Tests
             }
         }
 
-        public static async Task VerifyHttpResponseFromContainerAsync(string containerName, DockerHelper dockerHelper, ITestOutputHelper outputHelper)
+        public static async Task<HttpResponseMessage> GetHttpResponseFromContainerAsync(string containerName, DockerHelper dockerHelper, ITestOutputHelper outputHelper, int containerPort = 80, string pathAndQuery = null, Action<HttpResponseMessage> validateCallback = null)
         {
             int retries = 30;
 
             // Can't use localhost when running inside containers or Windows.
             string url = !Config.IsRunningInContainer && DockerHelper.IsLinuxContainerModeEnabled
-                ? $"http://localhost:{dockerHelper.GetContainerHostPort(containerName)}"
-                : $"http://{dockerHelper.GetContainerAddress(containerName)}";
+                ? $"http://localhost:{dockerHelper.GetContainerHostPort(containerName, containerPort)}/{pathAndQuery}"
+                : $"http://{dockerHelper.GetContainerAddress(containerName)}:{containerPort}/{pathAndQuery}";
 
             using (HttpClient client = new HttpClient())
             {
@@ -225,24 +266,48 @@ namespace Microsoft.DotNet.Docker.Tests
                     retries--;
                     await Task.Delay(TimeSpan.FromSeconds(2));
 
+                    HttpResponseMessage result = null;
                     try
                     {
-                        using (HttpResponseMessage result = await client.GetAsync(url))
+                        result = await client.GetAsync(url);
+                        outputHelper.WriteLine($"HTTP {result.StatusCode}\n{(await result.Content.ReadAsStringAsync())}");
+
+                        if (null == validateCallback)
                         {
-                            outputHelper.WriteLine($"HTTP {result.StatusCode}\n{(await result.Content.ReadAsStringAsync())}");
                             result.EnsureSuccessStatusCode();
                         }
+                        else
+                        {
+                            validateCallback(result);
+                        }
 
-                        return;
+                        // Store response in local that will not be disposed
+                        HttpResponseMessage returnResult = result;
+                        result = null;
+                        return returnResult;
                     }
                     catch (Exception ex)
                     {
                         outputHelper.WriteLine($"Request to {url} failed - retrying: {ex}");
                     }
+                    finally
+                    {
+                        result?.Dispose();
+                    }
                 }
             }
 
             throw new TimeoutException($"Timed out attempting to access the endpoint {url} on container {containerName}");
+        }
+
+        public static async Task VerifyHttpResponseFromContainerAsync(string containerName, DockerHelper dockerHelper, ITestOutputHelper outputHelper, int containerPort = 80, string pathAndQuery = null)
+        {
+            (await GetHttpResponseFromContainerAsync(
+                containerName,
+                dockerHelper,
+                outputHelper,
+                containerPort,
+                pathAndQuery)).Dispose();
         }
     }
 }
